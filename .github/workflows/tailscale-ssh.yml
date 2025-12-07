@@ -1,0 +1,25 @@
+name: SSH via Tailscale
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: 'Command to run on the server'
+        required: false
+        default: 'uname -a && cat /etc/os-release && df -h && free -h'
+
+jobs:
+  ssh-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: SSH to server
+        run: |
+          sleep 3
+          tailscale status
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+            root@100.121.28.24 "${{ github.event.inputs.command }}"
