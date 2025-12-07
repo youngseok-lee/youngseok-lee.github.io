@@ -6,7 +6,7 @@ on:
       command:
         description: 'Command to run on the server'
         required: false
-        default: 'uname -a && cat /etc/os-release && hostnamectl && df -h && free -h'
+        default: 'uname -a && cat /etc/os-release && df -h && free -h'
 
 jobs:
   ssh-server:
@@ -15,16 +15,11 @@ jobs:
       - name: Setup Tailscale
         uses: tailscale/github-action@v3
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-      - name: SSH to server and check OS
+      - name: SSH to server
         run: |
-          # Wait for Tailscale to connect
-          sleep 5
+          sleep 3
           tailscale status
-
-          # SSH to server (add your server's Tailscale IP or hostname)
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
             root@100.121.28.24 "${{ github.event.inputs.command }}"
